@@ -11,7 +11,7 @@ const fsWriteAlbums = (dataToWrite) => {
   return fs.writeFileSync('albums.json', JSON.stringify(dataToWrite, null, 2))
 }
 
-//Retrive
+//RETRIVE
 //Return all albums
 app.get("/albums", (req, res) => {
   res.send(albums);
@@ -37,7 +37,7 @@ app.get("/albums/:albumId", (req, res) => {
   }
 });
 
-//Create
+//CREATE
 //Middleware
 app.use(express.json());
 
@@ -50,19 +50,24 @@ app.post("/albums", (req, res) => {
   newAlbum.albumId = newAlbumId;
 
   //Check if all properties was send in the body
-  const allPropertiesOk = (Object.keys(newAlbum).sort() === (Object.keys(albums[0]).sort()))
-
+  const allPropertiesOk = lodash.isEqual(Object.keys(newAlbum).sort(), Object.keys(albums[0]).sort())
+  console.log(allPropertiesOk)
+  
   //Create a new Album
   if (allPropertiesOk) {
+
     //Push new albums and write it to albums.json
     albums.push(newAlbum);
     fsWriteAlbums(albums);
     res.status(201).json(albums);
+    
   } else { //If album's properties are not complete
     res.send('Complete all properties')
   }
-
 });
+
+//DELETE
+
 
 
 
