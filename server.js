@@ -2,6 +2,14 @@
 const express = require('express');
 const app = express();
 const albums = require('./albums');
+const lodash = require('lodash')
+const fs = require('fs')
+
+//fs write function
+
+const fsWriteAlbums = (dataToWrite) => {
+  return fs.writeFileSync('albums.json', JSON.stringify(dataToWrite, null, 2))
+}
 
 //Retrive
 //Return all albums
@@ -16,7 +24,7 @@ app.get("/albums/:albumId", (req, res) => {
 
   //Check if albumId is a number equal or larger than 0 
   const isNumber = (!isNaN(albumId) && albumId > 0);
-  
+
   //Search album by albumID
   if (isNumber) {
     result = albums.find(album => album.albumId == albumId);
@@ -28,6 +36,35 @@ app.get("/albums/:albumId", (req, res) => {
     res.status(400).send('Send a number larger than please');
   }
 });
+
+//Create
+//Middleware
+app.use(express.json());
+
+//Add new album
+app.post("/albums", (req, res) => {
+  const newAlbum = req.body;
+
+  //Create and assign new albumId
+  newAlbumId = Math.max(...albums.map((album) => album.albumId)) + 1;
+  newAlbum.albumId = newAlbumId;
+
+  //Check if all properties was send in the body
+  const allPropertiesOk = (Object.keys(newAlbum).sort() === (Object.keys(albums[0]).sort()))
+
+  //Create a new Album
+  if (allPropertiesOk) {
+    //Push new albums and write it to albums.json
+    albums.push(newAlbum);
+    fsWriteAlbums(albums);
+    res.status(201).json(albums);
+  } else { //If album's properties are not complete
+    res.send('Complete all properties')
+  }
+
+});
+
+
 
 //Port 
 app.listen(3000, () => console.log("Server is up and running"))
